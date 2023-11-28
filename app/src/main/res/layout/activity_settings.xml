@@ -2,105 +2,77 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".SettingsActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarSettings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         app:navigationIcon="@drawable/arrow_back"
+
         app:title="@string/settings"
-        app:titleTextAppearance="@style/ToolbarSettingsTitleText" />
+        app:titleTextAppearance="@style/ToolbarOtherMenuTitleText"/>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="45dp"
-        android:layout_marginStart="@dimen/activity_settings_padding_start_16dp"
-        android:layout_marginEnd="@dimen/activity_settings_padding_end_12dp">
+        style="@style/ActivitySettingsFrameLayout"
+        android:layout_marginTop="45dp">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/ActivitySettingsTextView"
             android:layout_gravity="center_vertical"
-            android:text="@string/black_theme"
-            android:textColor="@color/black"
-            android:textSize="@dimen/settingslist_text_16sp" />
+            android:text="@string/black_theme" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switcherDarkTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end" />
+            android:layout_gravity="end"
+            style="@style/SwitchCompat" />
     </FrameLayout>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:layout_marginStart="@dimen/activity_settings_padding_start_16dp"
-        android:layout_marginEnd="@dimen/activity_settings_padding_end_12dp">
+        style="@style/ActivitySettingsFrameLayout"
+        android:layout_marginTop="32dp">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/share_app"
-            android:textColor="@color/black"
-            android:textSize="@dimen/settingslist_text_16sp" />
+            style="@style/ActivitySettingsTextView"
+            android:text="@string/share_app" />
 
         <ImageView
             android:id="@+id/buttonShare"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
+            style="@style/ActivitySettingsIcons"
             android:src="@drawable/share" />
     </FrameLayout>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_settings_elements_margintop_42dp"
-        android:layout_marginStart="@dimen/activity_settings_padding_start_16dp"
-        android:layout_marginEnd="@dimen/activity_settings_padding_end_12dp">
+        style="@style/ActivitySettingsFrameLayout"
+        android:layout_marginTop="@dimen/activity_settings_elements_margintop_42dp">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/text_to_support"
-            android:textColor="@color/black"
-            android:textSize="@dimen/settingslist_text_16sp" />
+            style="@style/ActivitySettingsTextView"
+            android:text="@string/text_to_support" />
 
         <ImageView
             android:id="@+id/buttonSupport"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
+            style="@style/ActivitySettingsIcons"
             android:src="@drawable/support" />
     </FrameLayout>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_settings_elements_margintop_42dp"
-        android:layout_marginStart="@dimen/activity_settings_padding_start_16dp"
-        android:layout_marginEnd="@dimen/activity_settings_padding_end_12dp">
+        style="@style/ActivitySettingsFrameLayout"
+        android:layout_marginTop="@dimen/activity_settings_elements_margintop_42dp">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/user_agreement"
-            android:textColor="@color/black"
-            android:textSize="@dimen/settingslist_text_16sp" />
+            style="@style/ActivitySettingsTextView"
+            android:text="@string/user_agreement" />
 
         <ImageView
             android:id="@+id/buttonUserAgreement"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
+            style="@style/ActivitySettingsIcons"
             android:src="@drawable/arrow_forward" />
     </FrameLayout>
 </LinearLayout>
