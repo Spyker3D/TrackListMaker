@@ -5,42 +5,52 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
+import com.practicum.playlistmaker.databinding.ActivitySearchBinding
 
 class SearchActivity : AppCompatActivity() {
 
     private var text: String = ""
-    private lateinit var inputEditText: EditText
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_search)
+        val binding = ActivitySearchBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        inputEditText = findViewById<EditText>(R.id.inputEditText)
-        val clearButton = findViewById<ImageView>(R.id.clearIcon)
-        val searchToolbar: Toolbar = findViewById(R.id.toolbarSearch)
+        val inputEditText = binding.inputEditText
 
-        searchToolbar.setNavigationOnClickListener {
+        if (savedInstanceState != null) {
+            text = savedInstanceState.getString(INPUT_TEXT).toString()
+            inputEditText.setText(text)
+        }
+
+        binding.toolbarSearch.setNavigationOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        clearButton.setOnClickListener {
+        val imm: InputMethodManager =
+            getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+
+        binding.clearIcon.setOnClickListener {
             inputEditText.setText("")
+
+            imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
         }
 
         val simpleTextWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // empty
-            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
+                Unit
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                clearButton.visibility = clearButtonVisibility(s)
-                text = inputEditText.text.toString()
-            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
             override fun afterTextChanged(s: Editable?) {
-                // empty
+                binding.clearIcon.isVisible = !s.isNullOrEmpty()
+                text = inputEditText.text.toString()
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
@@ -51,22 +61,7 @@ class SearchActivity : AppCompatActivity() {
         outState.putString(INPUT_TEXT, text)
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        text = savedInstanceState.getString(INPUT_TEXT).toString()
-        inputEditText.setText(text)
-    }
-
-
-    private fun clearButtonVisibility(s: CharSequence?): Int {
-        return if (s.isNullOrEmpty()) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
-    }
-
     companion object {
-        const val INPUT_TEXT = "INPUT_TEXT"
+        private const val INPUT_TEXT = "INPUT_TEXT"
     }
 }
