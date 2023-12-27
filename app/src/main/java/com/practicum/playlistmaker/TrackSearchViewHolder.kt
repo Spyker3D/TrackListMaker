@@ -1,14 +1,11 @@
 package com.practicum.playlistmaker
 
-import android.view.RoundedCorner
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.practicum.playlistmaker.databinding.ActivityMainBinding
-import com.practicum.playlistmaker.databinding.TrackViewBinding
 
 class TrackSearchViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -25,7 +22,7 @@ class TrackSearchViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
             .load(track.artworkUrl100)
             .placeholder(R.drawable.placeholder)
             .centerCrop()
-            .transform(RoundedCorners(itemView.resources.getDimensionPixelSize(R.dimen.track_image_rounding_2dp)))
+            .transform(RoundedCorners(itemView.resources.getDimensionPixelSize(R.dimen.track_image_rounding)))
             .into(trackImage)
     }
 }

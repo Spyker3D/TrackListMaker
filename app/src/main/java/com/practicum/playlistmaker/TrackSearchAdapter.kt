@@ -16,9 +16,7 @@ class TrackSearchAdapter(private var trackList: List<Track>) :
         holder.bind(trackList[position])
     }
 
-    override fun getItemCount(): Int {
-        return trackList.size
-    }
+    override fun getItemCount() = trackList.size
 
     fun clearList() {
         trackList = listOf()
