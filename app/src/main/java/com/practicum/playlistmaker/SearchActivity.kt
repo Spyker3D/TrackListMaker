@@ -1,9 +1,11 @@
 package com.practicum.playlistmaker
 
+import android.graphics.drawable.BitmapDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -16,6 +18,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -33,6 +37,7 @@ class SearchActivity : AppCompatActivity() {
         .baseUrl(ITUNES_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
+    private val iTunesApi = retrofit.create(ItunesApi::class.java)
     private val trackSearchAdapter = TrackSearchAdapter()
     private lateinit var binding: ActivitySearchBinding
     private lateinit var updateButton: Button
@@ -113,7 +118,6 @@ class SearchActivity : AppCompatActivity() {
         val imagePlaceholder = binding.imagePlaceholder
         when (image) {
             android.R.color.transparent -> {
-                imagePlaceholder.setImageResource(image)
                 imagePlaceholder.isVisible = false
                 updateButton.isVisible = false
             }
@@ -136,7 +140,6 @@ class SearchActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 try {
-                    val iTunesApi = retrofit.create(ItunesApi::class.java)
                     val trackResponse = iTunesApi.searchTrack(text)
                     if (trackResponse.results.isNotEmpty()) {
                         trackSearchAdapter.trackList = trackResponse.results
@@ -147,10 +150,11 @@ class SearchActivity : AppCompatActivity() {
                         setTextPlaceholder(getString(R.string.nothing_found))
                         setImagePlaceholder(R.drawable.not_found_icon)
                     }
-                } catch (e: Exception) { // is HttpException or separate catch clause (HttpException)
+                } catch (e: Exception) {
                     setTextPlaceholder(getString(R.string.search_error_message))
                     setImagePlaceholder(R.drawable.search_error_icon)
                 }
+                this@launch.cancel()
             }
         }
     }
