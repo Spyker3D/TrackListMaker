@@ -1,6 +1,6 @@
 package com.practicum.playlistmaker
 
-import android.graphics.drawable.BitmapDrawable
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -9,30 +9,23 @@ import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.HttpException
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
 private const val ITUNES_URL = "https://itunes.apple.com"
+private const val KEY_INPUT_TEXT = "INPUT_TEXT"
 
 class SearchActivity : AppCompatActivity() {
 
@@ -42,26 +35,57 @@ class SearchActivity : AppCompatActivity() {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
     private val iTunesApi = retrofit.create(ItunesApi::class.java)
-    private val trackSearchAdapter = TrackSearchAdapter()
+    private lateinit var trackSearchAdapter: TrackAdapter
     private lateinit var binding: ActivitySearchBinding
     private lateinit var updateButton: Button
+    private lateinit var sharedPrefsListener: OnSharedPreferenceChangeListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val inputEditText = binding.inputEditText
+        val sharedPreferences = getSharedPreferences(
+            PLAYLISTMAKER_SHARED_PREFS,
+            MODE_PRIVATE
+        )
 
         binding.toolbarSearch.setNavigationOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        trackSearchAdapter.trackList = listOf<Track>()
-        val searchRecyclerView = binding.searchRecyclerView
-        searchRecyclerView.layoutManager =
+        val recyclerView = binding.searchRecyclerView
+        recyclerView.layoutManager =
             LinearLayoutManager(this@SearchActivity, LinearLayoutManager.VERTICAL, false)
-        searchRecyclerView.adapter = trackSearchAdapter
+
+        val youSearchedText: TextView = binding.youSearchedText
+
+        val trackHistoryAdapter = TrackAdapter(
+            readFromTrackListHistoryFromSharedPrefs(sharedPreferences).toMutableList(),
+            onActionButtonClickListener = {
+                it.clearList()
+                writeTrackListHistoryToSharedPrefs(
+                    sharedPreferences, it.trackList
+                )
+                recyclerView.adapter = trackSearchAdapter
+                youSearchedText.isVisible = false
+                trackSearchAdapter.clearList()
+            }
+        )
+
+        val onTrackClickListener = OnTrackClickListener { track ->
+            trackHistoryAdapter.updateList {
+                val historyList = addToHistoryList(track, it) // it = adapter.trackList
+                writeTrackListHistoryToSharedPrefs(sharedPreferences, historyList)
+                historyList
+            }
+        }
+
+        trackSearchAdapter = TrackAdapter(emptyList(), onTrackClickListener)
+        recyclerView.adapter = trackSearchAdapter
+
+        val inputEditText = binding.inputEditText
 
         val simpleTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
@@ -72,6 +96,12 @@ class SearchActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 binding.clearIcon.isVisible = !s.isNullOrEmpty()
                 text = inputEditText.text.toString()
+
+                val showHistory =
+                    inputEditText.hasFocus() && s?.isEmpty() == true && !trackHistoryAdapter.isEmpty()
+
+                recyclerView.adapter = if (showHistory) trackHistoryAdapter else trackSearchAdapter
+                youSearchedText.isVisible = showHistory
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
@@ -99,6 +129,17 @@ class SearchActivity : AppCompatActivity() {
         updateButton = binding.buttonUpdate
         updateButton.setOnClickListener {
             search()
+        }
+
+        sharedPrefsListener = OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            historyAdapterRestore(sharedPreferences, key, trackHistoryAdapter)
+        }
+
+        inputEditText.setOnFocusChangeListener { _, hasFocus ->
+            val showHistory =
+                hasFocus && inputEditText.text.isEmpty() && !trackHistoryAdapter.isEmpty()
+            recyclerView.adapter = if (showHistory) trackHistoryAdapter else trackSearchAdapter
+            youSearchedText.isVisible = showHistory
         }
     }
 
@@ -149,8 +190,7 @@ class SearchActivity : AppCompatActivity() {
                     }
                     if (trackResponse.code() == 200) {
                         if (trackResponse.body()?.results?.isNotEmpty() == true) {
-                            trackSearchAdapter.trackList = trackResponse.body()?.results!!
-                            trackSearchAdapter.notifyDataSetChanged()
+                            trackSearchAdapter.updateList { trackResponse.body()?.results!! }
                             setTextPlaceholder("")
                             setImagePlaceholder(android.R.color.transparent)
                         } else {
@@ -170,9 +210,5 @@ class SearchActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    companion object {
-        private const val KEY_INPUT_TEXT = "INPUT_TEXT"
     }
 }
