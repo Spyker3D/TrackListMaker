@@ -33,7 +33,7 @@ fun historyAdapterRestore(
 ) {
     if (key == TRACK_LIST_HISTORY_KEY) {
         val trackListAsArrayList =
-            readFromTrackListHistoryFromSharedPrefs(sharedPreferences).toCollection((ArrayList()))
+            readFromTrackListHistoryFromSharedPrefs(sharedPreferences).toCollection(ArrayList())
         adapter.updateList {
             trackListAsArrayList
         }

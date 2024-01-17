@@ -30,7 +30,7 @@ class TrackAdapter(
             TYPE_BUTTON -> {
                 val buttonBinding = ClearHistoryButtonBinding.inflate(inflater, parent, false)
                 buttonBinding.buttonClearHistory.setOnClickListener {
-                    onActionButtonClickListener!!(this)
+                    onActionButtonClickListener?.invoke(this)
                 }
                 ButtonViewHolder(buttonBinding.root)
             }

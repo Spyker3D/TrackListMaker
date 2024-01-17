@@ -1,20 +1,24 @@
 package com.practicum.playlistmaker
 
+import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -26,6 +30,7 @@ import java.io.IOException
 
 private const val ITUNES_URL = "https://itunes.apple.com"
 private const val KEY_INPUT_TEXT = "INPUT_TEXT"
+private const val KEY_SEARCH_TRACKLIST = "TRACKLIST_SEARCH"
 
 class SearchActivity : AppCompatActivity() {
 
@@ -36,9 +41,11 @@ class SearchActivity : AppCompatActivity() {
         .build()
     private val iTunesApi = retrofit.create(ItunesApi::class.java)
     private lateinit var trackSearchAdapter: TrackAdapter
+    private lateinit var trackHistoryAdapter: TrackAdapter
     private lateinit var binding: ActivitySearchBinding
     private lateinit var updateButton: Button
     private lateinit var sharedPrefsListener: OnSharedPreferenceChangeListener
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,31 +62,21 @@ class SearchActivity : AppCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        val recyclerView = binding.searchRecyclerView
+        recyclerView = binding.searchRecyclerView
         recyclerView.layoutManager =
             LinearLayoutManager(this@SearchActivity, LinearLayoutManager.VERTICAL, false)
 
         val youSearchedText: TextView = binding.youSearchedText
 
-        val trackHistoryAdapter = TrackAdapter(
+        trackHistoryAdapter = TrackAdapter(
             readFromTrackListHistoryFromSharedPrefs(sharedPreferences).toMutableList(),
             onActionButtonClickListener = {
-                it.clearList()
-                writeTrackListHistoryToSharedPrefs(
-                    sharedPreferences, it.trackList
-                )
-                recyclerView.adapter = trackSearchAdapter
-                youSearchedText.isVisible = false
-                trackSearchAdapter.clearList()
+                setupCleanHistoryButtonListener(it, sharedPreferences, youSearchedText)
             }
         )
 
         val onTrackClickListener = OnTrackClickListener { track ->
-            trackHistoryAdapter.updateList {
-                val historyList = addToHistoryList(track, it) // it = adapter.trackList
-                writeTrackListHistoryToSharedPrefs(sharedPreferences, historyList)
-                historyList
-            }
+            setOnTrackClickListenerLogic(track, sharedPreferences)
         }
 
         trackSearchAdapter = TrackAdapter(emptyList(), onTrackClickListener)
@@ -94,14 +91,7 @@ class SearchActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
             override fun afterTextChanged(s: Editable?) {
-                binding.clearIcon.isVisible = !s.isNullOrEmpty()
-                text = inputEditText.text.toString()
-
-                val showHistory =
-                    inputEditText.hasFocus() && s?.isEmpty() == true && !trackHistoryAdapter.isEmpty()
-
-                recyclerView.adapter = if (showHistory) trackHistoryAdapter else trackSearchAdapter
-                youSearchedText.isVisible = showHistory
+                setTextWatcherLogic(s, inputEditText, youSearchedText)
             }
         }
         inputEditText.addTextChangedListener(simpleTextWatcher)
@@ -115,15 +105,18 @@ class SearchActivity : AppCompatActivity() {
         if (savedInstanceState != null) {
             text = savedInstanceState.getString(KEY_INPUT_TEXT).toString()
             inputEditText.setText(text)
+            trackSearchAdapter.updateList {
+                savedInstanceState.getParcelableArrayList(
+                    KEY_SEARCH_TRACKLIST
+                ) ?: mutableListOf()
+            }
         }
 
         val imm: InputMethodManager =
             getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
 
         binding.clearIcon.setOnClickListener {
-            inputEditText.setText("")
-            imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
-            trackSearchAdapter.clearList()
+            setClearIconOnClickListenerLogic(inputEditText, imm)
         }
 
         updateButton = binding.buttonUpdate
@@ -136,16 +129,17 @@ class SearchActivity : AppCompatActivity() {
         }
 
         inputEditText.setOnFocusChangeListener { _, hasFocus ->
-            val showHistory =
-                hasFocus && inputEditText.text.isEmpty() && !trackHistoryAdapter.isEmpty()
-            recyclerView.adapter = if (showHistory) trackHistoryAdapter else trackSearchAdapter
-            youSearchedText.isVisible = showHistory
+            setOnFocusChangeListenerLogic(hasFocus, inputEditText, youSearchedText)
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(KEY_INPUT_TEXT, text)
+        outState.putParcelableArrayList(
+            KEY_SEARCH_TRACKLIST,
+            ArrayList(trackSearchAdapter.trackList)
+        )
     }
 
     private fun setTextPlaceholder(text: String) {
@@ -210,5 +204,57 @@ class SearchActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun setupCleanHistoryButtonListener(
+        trackAdapter: TrackAdapter,
+        sharedPreferences: SharedPreferences,
+        youSearchedText: TextView
+    ) {
+        trackAdapter.clearList()
+        writeTrackListHistoryToSharedPrefs(sharedPreferences, trackAdapter.trackList)
+        recyclerView.adapter = trackSearchAdapter
+        youSearchedText.isVisible = false
+        trackSearchAdapter.clearList()
+    }
+
+    private fun setOnFocusChangeListenerLogic(
+        hasFocus: Boolean,
+        inputEditText: EditText,
+        youSearchedText: TextView
+    ) {
+        val showHistory =
+            hasFocus && inputEditText.text.isEmpty() && !trackHistoryAdapter.isEmpty()
+        recyclerView.adapter = if (showHistory) trackHistoryAdapter else trackSearchAdapter
+        youSearchedText.isVisible = showHistory
+    }
+
+    private fun setOnTrackClickListenerLogic(track: Track, sharedPreferences: SharedPreferences) {
+        trackHistoryAdapter.updateList {
+            val historyList = addToHistoryList(track, it)
+            writeTrackListHistoryToSharedPrefs(sharedPreferences, historyList)
+            historyList
+        }
+    }
+
+    private fun setClearIconOnClickListenerLogic(inputEditText: EditText, imm: InputMethodManager) {
+        inputEditText.setText("")
+        imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
+        trackSearchAdapter.clearList()
+    }
+
+    private fun setTextWatcherLogic(
+        s: Editable?,
+        inputEditText: EditText,
+        youSearchedText: TextView
+    ) {
+        binding.clearIcon.isVisible = !s.isNullOrEmpty()
+        text = inputEditText.text.toString()
+
+        val showHistory =
+            inputEditText.hasFocus() && s?.isEmpty() == true && !trackHistoryAdapter.isEmpty()
+
+        recyclerView.adapter = if (showHistory) trackHistoryAdapter else trackSearchAdapter
+        youSearchedText.isVisible = showHistory
     }
 }
