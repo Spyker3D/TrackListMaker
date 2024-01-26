@@ -8,6 +8,8 @@ import com.practicum.playlistmaker.databinding.ActivityAudioplayerBinding
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+const val KEY_SELECTED_TRACK_DETAILS = "TRACK_DETAILS"
+
 class AudioplayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,13 +21,13 @@ class AudioplayerActivity : AppCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        val track = intent.extras?.getParcelable("trackDetails") as Track?
+        val track = intent.extras?.getParcelable(KEY_SELECTED_TRACK_DETAILS) as Track?
 
         binding.trackName.text = track?.trackName
         binding.bandName.text = track?.artistName
         binding.albumNamePlaceholder.text = track?.collectionName
         binding.lengthPlaceholder.text =
-            SimpleDateFormat("mm:ss", Locale.getDefault()).format(track?.trackTimeMillis)
+            track?.formatTrackLength()
 
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
         binding.yearPlaceholder.text = inputFormat.parse(track?.releaseDate.toString())?.let {

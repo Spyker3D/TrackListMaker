@@ -13,7 +13,7 @@ class TrackViewHolder(private val binding: TrackViewBinding) : RecyclerView.View
         binding.trackName.text = track.trackName
         binding.bandName.text = track.artistName
         binding.trackDuration.text =
-            SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
+            track.formatTrackLength()
         Glide.with(itemView)
             .load(track.artworkUrl100)
             .placeholder(R.drawable.placeholder_track)

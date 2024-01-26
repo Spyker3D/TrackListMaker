@@ -240,7 +240,7 @@ class SearchActivity : AppCompatActivity() {
             }
         }
         val audioplayerIntent = Intent(this, AudioplayerActivity::class.java)
-        audioplayerIntent.putExtra("trackDetails", track)
+        audioplayerIntent.putExtra(KEY_SELECTED_TRACK_DETAILS, track)
         startActivity(audioplayerIntent)
     }
 
