@@ -13,6 +13,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -25,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
@@ -47,6 +49,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var updateButton: Button
     private lateinit var sharedPrefsListener: OnSharedPreferenceChangeListener
     private lateinit var recyclerView: RecyclerView
+    private lateinit var imagePlaceholder: ImageView
+    private lateinit var textPlaceholder: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,7 +149,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun setTextPlaceholder(text: String) {
-        val textPlaceholder = binding.textPlaceholder
+        textPlaceholder = binding.textPlaceholder
         if (text.isNotEmpty()) {
             textPlaceholder.isVisible = true
             trackSearchAdapter.clearList()
@@ -156,7 +160,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun setImagePlaceholder(image: Int) {
-        val imagePlaceholder = binding.imagePlaceholder
+        imagePlaceholder = binding.imagePlaceholder
         when (image) {
             android.R.color.transparent -> {
                 imagePlaceholder.isVisible = false
@@ -181,26 +185,29 @@ class SearchActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 try {
-                    val trackResponse = withContext(Dispatchers.IO) {
-                        iTunesApi.searchTrack(text).execute()
-                    }
-                    if (trackResponse.code() == 200) {
-                        if (trackResponse.body()?.results?.isNotEmpty() == true) {
-                            trackSearchAdapter.updateList { trackResponse.body()?.results!! }
-                            setTextPlaceholder("")
-                            setImagePlaceholder(android.R.color.transparent)
-                        } else {
-                            setTextPlaceholder(getString(R.string.nothing_found))
-                            setImagePlaceholder(R.drawable.not_found_icon)
-                        }
+                    val iTunesApi = retrofit.create(ItunesApi::class.java)
+                    val trackResponse = iTunesApi.searchTrack(text)
+                    if (trackResponse.results.isNotEmpty()) {
+                        trackSearchAdapter.updateList { trackResponse.results }
+                        setTextPlaceholder("")
+                        setImagePlaceholder(android.R.color.transparent)
                     } else {
-                        setTextPlaceholder(getString(R.string.server_error))
-                        setImagePlaceholder(R.drawable.search_error_icon)
+                        setTextPlaceholder(getString(R.string.nothing_found))
+                        setImagePlaceholder(R.drawable.not_found_icon)
                     }
                 } catch (e: IOException) {
-                    Log.e("SearchActivity", "Network error", e)
-                    setTextPlaceholder(getString(R.string.search_error_message))
-                    setImagePlaceholder(R.drawable.search_error_icon)
+                    when(e) {
+                        is HttpException -> {
+                            Log.e("SearchActivity", "non-2xx HTTP response", e)
+                            setTextPlaceholder(getString(R.string.server_error))
+                            setImagePlaceholder(R.drawable.search_error_icon)
+                        }
+                        else -> {
+                            Log.e("SearchActivity", "Network error", e)
+                            setTextPlaceholder(getString(R.string.search_error_message))
+                            setImagePlaceholder(R.drawable.search_error_icon)
+                        }
+                    }
                 } finally {
                     this@launch.cancel()
                 }
@@ -263,5 +270,11 @@ class SearchActivity : AppCompatActivity() {
 
         recyclerView.adapter = if (showHistory) trackHistoryAdapter else trackSearchAdapter
         youSearchedText.isVisible = showHistory
+
+        if (recyclerView.adapter == trackHistoryAdapter) {
+            imagePlaceholder.isVisible = false
+            textPlaceholder.isVisible = false
+            updateButton.isVisible = false
+        }
     }
 }
