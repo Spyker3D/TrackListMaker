@@ -30,8 +30,9 @@ class AudioplayerActivity : AppCompatActivity() {
                 handler.postDelayed(this, UPDATE_PLAY_PROGRESS_DEBOUNCE_DELAY)
             }
         }
-    } // lazy!
+    }
     private lateinit var binding: ActivityAudioplayerBinding
+    private val dateFormat by lazy { SimpleDateFormat("mm:ss", Locale.getDefault()) }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,13 +97,13 @@ class AudioplayerActivity : AppCompatActivity() {
             handler.removeCallbacks(replayProgressRunnable)
             setImagePlaceholder(R.drawable.button_play)
             playerState = PlayerState.STATE_PREPARED
-            binding.replayProgress.text = "0:00"
+            binding.replayProgress.text = dateFormat.format(0)
         }
     }
 
     private fun startPlayer() {
         mediaPlayer.start()
-        binding.replayProgress.text = "0:00"
+        binding.replayProgress.text = dateFormat.format(0)
         setImagePlaceholder(R.drawable.pause_button)
         playerState = PlayerState.STATE_PLAYING
         handler.post(replayProgressRunnable)
@@ -135,6 +136,6 @@ class AudioplayerActivity : AppCompatActivity() {
 
     private fun updateProgressTime() {
         binding.replayProgress.text =
-            SimpleDateFormat("m:ss", Locale.getDefault()).format(mediaPlayer.currentPosition)
+            dateFormat.format(mediaPlayer.currentPosition)
     }
 }

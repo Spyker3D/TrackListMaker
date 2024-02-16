@@ -51,6 +51,7 @@ class SearchActivity : AppCompatActivity() {
     private val iTunesApi = retrofit.create(ItunesApi::class.java)
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable { search() }
+    private val isClickAllowedRunnable = Runnable { isClickAllowed = true }
 
     private lateinit var trackSearchAdapter: TrackAdapter
     private lateinit var trackHistoryAdapter: TrackAdapter
@@ -141,6 +142,13 @@ class SearchActivity : AppCompatActivity() {
         inputEditText.setOnFocusChangeListener { _, hasFocus ->
             setOnFocusChangeListenerLogic(hasFocus, inputEditText, youSearchedText)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(searchRunnable)
+        handler.removeCallbacks(isClickAllowedRunnable)
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -298,7 +306,7 @@ class SearchActivity : AppCompatActivity() {
         val current = isClickAllowed
         if (isClickAllowed) {
             isClickAllowed = false
-            handler.postDelayed({ isClickAllowed = true }, TRACK_CLICK_DEBOUNCE_DELAY)
+            handler.postDelayed(isClickAllowedRunnable, TRACK_CLICK_DEBOUNCE_DELAY)
         }
         return current
     }
