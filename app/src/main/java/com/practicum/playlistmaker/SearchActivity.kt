@@ -13,7 +13,6 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -27,6 +26,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
+import org.w3c.dom.Text
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
@@ -51,6 +51,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var imagePlaceholder: ImageView
     private lateinit var textPlaceholder: TextView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -149,7 +150,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun setTextPlaceholder(text: String) {
-        textPlaceholder = binding.textPlaceholder
+        val textPlaceholder = binding.textPlaceholder
         if (text.isNotEmpty()) {
             textPlaceholder.isVisible = true
             trackSearchAdapter.clearList()
@@ -160,7 +161,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun setImagePlaceholder(image: Int) {
-        imagePlaceholder = binding.imagePlaceholder
+        val imagePlaceholder = binding.imagePlaceholder
         when (image) {
             android.R.color.transparent -> {
                 imagePlaceholder.isVisible = false
@@ -276,5 +277,25 @@ class SearchActivity : AppCompatActivity() {
             textPlaceholder.isVisible = false
             updateButton.isVisible = false
         }
+        if (s?.isNotBlank() == true) {
+            searchDebounce()
+        } else {
+            handler.removeCallbacks(searchRunnable)
+            trackSearchAdapter.clearList()
+        }
+    }
+
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed(isClickAllowedRunnable, TRACK_CLICK_DEBOUNCE_DELAY)
+        }
+        return current
+    }
+
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
     }
 }
