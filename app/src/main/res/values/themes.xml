@@ -1,13 +1,23 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Base.Theme.PlaylistMaker" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimary">@color/blue</item>
         <item name="colorPrimaryVariant">@color/white</item>
         <item name="colorOnPrimary">@color/dark_black</item>
         <item name="colorSecondary">@color/blue</item>
         <item name="colorSecondaryVariant">@color/blue</item>
         <item name="colorOnSecondary">@color/white</item>
         <item name="android:colorBackground">@color/white</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorControlNormal">@color/control</item>
+        <item name="materialAlertDialogTheme">@style/MaterialAlertDialog</item>
+    </style>
+
+    <style name="MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.TitleText</item>
+        <item name="buttonBarNegativeButtonStyle">@style/MaterialAlertDialog.Button</item>
+        <item name="buttonBarNeutralButtonStyle">@style/MaterialAlertDialog.Button</item>
+        <item name="buttonBarPositiveButtonStyle">@style/MaterialAlertDialog.Button</item>
     </style>
 
     <style name="Theme.PlaylistMaker" parent="Base.Theme.PlaylistMaker" />

@@ -4,6 +4,7 @@
     <string name="medialibrary_button_text">Медиатека</string>
     <string name="settings">Настройки</string>
     <string name="search">Поиск</string>
+    <string name="media_library">Медиатека</string>
     <string name="black_theme">Темная тема</string>
     <string name="share_app">Поделиться приложением</string>
     <string name="text_to_support">Написать в поддержку</string>
@@ -24,5 +25,57 @@
     <string name="track_genre">Жанр</string>
     <string name="track_album">Альбом</string>
     <string name="track_release_year">Год</string>
+    <string name="playlists_text_placeholder">Вы не создали ни\u00A0одного плейлиста</string>
+    <string name="button_new_playlist">Новый плейлист</string>
+    <string name="favorite_tracks_text_placeholder">Ваша медиатека пуста</string>
+    <string name="medialibrary_tablayout_tab_1">Избранные треки</string>
+    <string name="medialibrary_tablayout_tab_2">Плейлисты</string>
+    <string name="bottom_navigator_search_tab">Поиск</string>
+    <string name="bottom_navigator_medialibrary_tab">Медиатека</string>
+    <string name="bottom_navigator_settings_tab">Настройки</string>
+    <string name="new_playlist_toolbar">Новый плейлист</string>
+    <string name="name_of_playlist_placeholder">Название*</string>
+    <string name="description_of_playlist_placeholder">Описание</string>
+    <string name="create_new_playlist">Создать</string>
+    <string name="add_to_playlist">Добавить в плейлист</string>
+    <plurals name="number_of_tracks_plurals">
+        <item quantity="zero">0 треков</item>
+        <item quantity="one">%1$d трек</item>
+        <item quantity="two">%1$d трека</item>
+        <item quantity="few">%1$d трека</item>
+        <item quantity="many">%1$d треков</item>
+        <item quantity="other">%1$d треков</item>
+    </plurals>
+    <string name="playlist_created_message">Плейлист "%1$s" создан!</string>
+    <string name="playlist_name_error_message">Плейлист с таким названием уже существует!</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="dialog_finalize">Завершить</string>
+    <string name="dialog_title">Завершить создание плейлиста?</string>
+    <string name="dialog_message">Все несохраненные данные будут потеряны</string>
+    <string name="track_insert_to_playlist_error">Трек уже добавлен в плейлист "%1$s"</string>
+    <string name="track_successfully_added_to_playlist">Добавлено в плейлист "%1$s"</string>
+    <string name="playlist_no_tracks_message">В этом плейлисте нет треков</string>
+    <string name="playlist_share_text_bottom_sheet">Поделиться</string>
+    <string name="playlist_edit_info_text_bottom_sheet">Редактировать информацию</string>
+    <string name="playlist_delete_text_bottom_sheet">Удалить плейлист</string>
+
+    <plurals name="play_list_length">
+        <item quantity="zero">0 минут</item>
+        <item quantity="one">%1$d минута</item>
+        <item quantity="two">%1$d минуты</item>
+        <item quantity="few">%1$d минуты</item>
+        <item quantity="many">%1$d минут</item>
+        <item quantity="other">%1$d минут</item>
+    </plurals>
+
+    <string name="dialog_track_deletion_message">Хотите удалить трек?</string>
+    <string name="dialog_track_deletion_negative">Нет</string>
+    <string name="dialog_track_deletion_positive">Да</string>
+    <string name="share_message_no_tracks">В этом плейлисте нет списка треков, которым можно поделиться</string>
+    <string name="share_playlist">Поделиться плейлистом</string>
+    <string name="delete_playlist_message">Хотите удалить плейлист "%1$s"?</string>
+    <string name="save_changes">Сохранить</string>
+    <string name="edit_title_for_toolbar">Редактировать</string>
 
 </resources>
+

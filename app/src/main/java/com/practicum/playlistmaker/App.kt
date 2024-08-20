@@ -1,35 +1,31 @@
 package com.practicum.playlistmaker
 
 import android.app.Application
-import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatDelegate
-
-const val PLAYLISTMAKER_SHARED_PREFS = "com.practicum.playlistmaker.MY_PREFS"
-const val SWITCHER_IS_CHECKED_STATUS = "isNightModeOn"
+import com.markodevcic.peko.PermissionRequester
+import com.practicum.playlistmaker.di.dataModule
+import com.practicum.playlistmaker.di.interactorModule
+import com.practicum.playlistmaker.di.repositoryModule
+import com.practicum.playlistmaker.di.viewModelModule
+import com.practicum.playlistmaker.settings.domain.interactor.SettingsInteractor
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 
 class App : Application() {
 
-    var nightMode = false
+    private var nightMode = false
+
     override fun onCreate() {
         super.onCreate()
-        nightMode = getSharedPreferences(PLAYLISTMAKER_SHARED_PREFS, MODE_PRIVATE).getBoolean(
-            SWITCHER_IS_CHECKED_STATUS, false
-        )
-        switchTheme(nightMode)
-    }
 
-    fun switchTheme(isNightModeOn: Boolean) {
-        nightMode = isNightModeOn
-        AppCompatDelegate.setDefaultNightMode(
-            if (isNightModeOn) {
-                AppCompatDelegate.MODE_NIGHT_YES
-            } else {
-                AppCompatDelegate.MODE_NIGHT_NO
-            }
-        )
-        getSharedPreferences(PLAYLISTMAKER_SHARED_PREFS, MODE_PRIVATE)
-            .edit()
-            .putBoolean(SWITCHER_IS_CHECKED_STATUS, isNightModeOn)
-            .apply()
+        startKoin {
+            androidContext(this@App)
+            modules(dataModule, interactorModule, repositoryModule, viewModelModule)
+        }
+        val settingsInteractor: SettingsInteractor by inject()
+        nightMode = settingsInteractor.getThemeSettings()
+        settingsInteractor.updateThemeSetting(nightMode)
+
+        PermissionRequester.initialize(applicationContext) // Initialization of Peko library
     }
 }
