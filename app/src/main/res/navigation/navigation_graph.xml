@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/searchFragment"
-        android:name="com.practicum.playlistmaker.search.ui.SearchFragment"
+        android:name="com.practicum.tracklistmaker.search.ui.SearchFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" >
         <action
@@ -21,12 +21,12 @@
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.practicum.playlistmaker.settings.presentation.SettingsFragment"
+        android:name="com.practicum.tracklistmaker.settings.presentation.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
     <fragment
         android:id="@+id/mediaLibraryFragment"
-        android:name="com.practicum.playlistmaker.mediaLibrary.presentation.MediaLibraryFragment"
+        android:name="com.practicum.tracklistmaker.mediaLibrary.presentation.MediaLibraryFragment"
         android:label="fragment_media_library"
         tools:layout="@layout/fragment_media_library" >
         <action
@@ -52,19 +52,19 @@
     </fragment>
     <activity
         android:id="@+id/audioplayerActivity"
-        android:name="com.practicum.playlistmaker.player.presentation.AudioplayerActivity"
+        android:name="com.practicum.tracklistmaker.player.presentation.AudioplayerActivity"
         android:label="AudioplayerActivity"
         tools:layout="@layout/activity_audioplayer"
         />
     <fragment
         android:id="@+id/newPlaylistFragment"
-        android:name="com.practicum.playlistmaker.mediaLibrary.presentation.newplaylist.NewPlaylistFragment"
+        android:name="com.practicum.tracklistmaker.mediaLibrary.presentation.newplaylist.NewPlaylistFragment"
         android:label="NewPlaylistFragment"
         tools:layout="@layout/fragment_new_playlist"
         />
     <fragment
         android:id="@+id/playlistDetailsAndEditFragment"
-        android:name="com.practicum.playlistmaker.mediaLibrary.presentation.playlistdetailsandedit.PlaylistDetailsFragment"
+        android:name="com.practicum.tracklistmaker.mediaLibrary.presentation.playlistdetailsandedit.PlaylistDetailsFragment"
         android:label="fragment_playlist_edit"
         tools:layout="@layout/fragment_playlist_edit"
         >
@@ -81,7 +81,7 @@
     </fragment>
     <fragment
         android:id="@+id/editPlaylistFragment"
-        android:name="com.practicum.playlistmaker.mediaLibrary.presentation.editplaylist.EditPlaylistFragment"
+        android:name="com.practicum.tracklistmaker.mediaLibrary.presentation.editplaylist.EditPlaylistFragment"
         android:label="EditPlaylistFragment"
         tools:layout="@layout/fragment_new_playlist">
     <argument
